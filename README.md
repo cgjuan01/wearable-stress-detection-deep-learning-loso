@@ -26,7 +26,7 @@ The held-out unit is always a whole person. Random window splits leak subject id
 | mahalanobis_features (unsupervised) | 0.956 [0.865 to 0.998] | n/a |
 | autoencoder_raw (unsupervised) | 0.619 [0.071 to 0.972] | n/a |
 
-AUROC is the primary metric because it is threshold-free. F1 for the feature model uses a threshold chosen by grouped inner cross-validation on the training subjects; those thresholds range from 0.11 to 0.87 across folds, which is why F1 has a wide floor and why it is secondary. The CNN uses a fixed 0.5.
+AUROC is the primary metric because it is threshold-free. F1 for the feature model uses a threshold chosen by grouped inner cross validation on the training subjects; those thresholds range from 0.11 to 0.87 across folds, which is why F1 has a wide floor and why it is secondary. The CNN uses a fixed 0.5.
 
 **Stress vs amusement only.** Both conditions raise arousal, so this is the discriminating test.
 
@@ -55,25 +55,25 @@ Heart rate and its variability carry the signal. Dropping the accelerometer feat
 
 ## What the failure cases say
 
-- **S14** has AUROC 0.980 but F1 0.091 on raw features: the ranking is right, the probabilities are all low. Their absolute heart rate sits outside the other fourteen subjects' range, so stressed S14 looks like resting everyone-else. Label-free within-subject normalisation lifts F1 to 0.894. A population model on absolute physiology fails a person whose baseline is unusual; per-person calibration fixes it. This is the failure mode to expect in any population whose resting physiology shifts, including pregnancy.
-- **S17** becomes the worst subject after normalisation (F1 0.231, AUROC 0.912): the inner-CV threshold for that fold is 0.87. Threshold selection on 14 people is unstable, which is why threshold-free metrics lead.
+- **S14** has AUROC 0.980 but F1 0.091 on raw features. The model orders S14's windows correctly (stress windows score higher than baseline windows) but assigns every window a low probability, so almost none cross the threshold. The cause is a scale difference: S14's heart rate, both at rest and under stress, is lower than the other fourteen subjects'. S14's stressed heart rate falls in the range where the other subjects were at rest, so a model trained on absolute values reads it as "not stressed". Label-free within-subject normalisation removes the absolute level and lifts F1 to 0.894. A population model on absolute physiology fails a person whose baseline is unusual; per-person calibration fixes it. This is the failure mode to expect in any population whose resting physiology shifts, including pregnancy.
+- **S17** becomes the worst subject after normalisation (F1 0.231, AUROC 0.912): the inner CV threshold for that fold is 0.87. Threshold selection on 14 people is unstable, which is why threshold-free metrics lead.
 - **Unsupervised detection** works on features (0.956) and fails on raw signal (0.619). Each raw window is z-scored per channel before the autoencoder sees it, which removes the level of heart rate and skin conductance, and the ablation shows that level is where the signal lives. The autoencoder is left with waveform shape, which reconstructs equally well stressed or not. Negative result with a known cause; kept as is.
-- **CNN vs features.** At n = 15 a 1D CNN on the raw stream matches the feature model on ranking and does not beat it, the two models fail on different subjects (CNN: S15, S9, S2; features: S14), and the CNN's worst-case AUROC moves with initialisation (0.831 at seed 0, 0.760 at seed 1) where the feature model has no seed dependence. An ensemble would probably help; not built.
+- **CNN vs features.** At n = 15 a 1D CNN on the raw stream matches the feature model on ranking and does not beat it, the two models fail on different subjects (CNN: S15, S9, S2; features: S14), and the CNN's worst case AUROC moves with initialisation (0.831 at seed 0, 0.760 at seed 1) where the feature model has no seed dependence. An ensemble would probably help; not built.
 
 ## What this does and does not establish
 
-A model trained on other people's wrist signals separates stress from non-stress in a person it has never seen, under a lab protocol (Trier Social Stress Test, seated baseline, amusement video). The effect of a TSST on heart rate is large, which is why the numbers are high. The TSST also involves standing and speaking, and wrist accelerometry cannot see posture, so part of the heart-rate rise may be physical rather than psychological; this dataset cannot separate the two. Nothing here is evidence about free-living data, a wider age range, or pregnancy. n = 15 limits every conclusion, and the leave-one-subject-out range is reported so that limit is visible.
+A model trained on other people's wrist signals separates stress from non-stress in a person it has never seen, under a lab protocol (Trier Social Stress Test, seated baseline, amusement video). The effect of a TSST on heart rate is large, which is why the numbers are high. The TSST also involves standing and speaking, and wrist accelerometry cannot see posture, so part of the heart rate rise may be physical rather than psychological; this dataset cannot separate the two. Nothing here is evidence about free-living data, a wider age range, or pregnancy. n = 15 limits every conclusion, and the leave-one-subject-out range is reported so that limit is visible.
 
 ## Signal processing (`src/signals.py`)
 
 - **BVP:** band-pass 0.5 to 4 Hz, peak detection with a 0.33 s refractory period and a prominence gate relative to window amplitude; inter-beat intervals outside 0.33 to 2.0 s dropped. Features: mean and SD of HR, SDNN, RMSSD, pNN50, beat count.
-- **EDA:** tonic = 0.05 Hz low-pass, phasic = residual; skin-conductance responses counted as phasic peaks over 0.01 uS. Features: SCL mean and slope, SCR count and mean amplitude, phasic SD.
-- **Accelerometer:** ENMO magnitude, and a motion-artefact fraction (share of 1 s epochs above 0.1 g).
+- **EDA:** tonic = 0.05 Hz low-pass, phasic = residual; skin conductance responses counted as phasic peaks over 0.01 uS. Features: SCL mean and slope, SCR count and mean amplitude, phasic SD.
+- **Accelerometer:** ENMO magnitude, and a motion artefact fraction (share of 1 s epochs above 0.1 g).
 - **Temperature:** mean and slope.
 
 ## Windowing (`src/windows.py`)
 
-60 s windows, 30 s stride. Label by majority vote over the 700 Hz protocol labels; windows under 90 % purity (transitions) dropped. Stress = label 2; non-stress = baseline (1) and amusement (3). Amusement is included by default because a model that only separates stress from sitting still is not detecting stress.
+60 s windows, 30 s stride. Label by majority vote over the 700 Hz protocol labels; windows under 90% purity (transitions) dropped. Stress = label 2; non-stress = baseline (1) and amusement (3). Amusement is included by default because a model that only separates stress from sitting still is not detecting stress.
 
 ## Reproduce
 
