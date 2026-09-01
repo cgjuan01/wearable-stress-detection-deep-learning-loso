@@ -1,8 +1,8 @@
 # Stress detection from wrist-worn physiological signals, evaluated on held-out people
 
-Predictive models for stress vs non-stress from an Empatica E4 wrist device (blood volume pulse, electrodermal activity, skin temperature, accelerometer), trained and evaluated leave-one-subject-out on WESAD (Schmidt et al. 2018; 15 subjects, 1,032 sixty-second windows, 30 % stress).
+Predictive models for stress vs non-stress from an Empatica E4 wrist device (blood volume pulse, electrodermal activity, skin temperature, accelerometer), trained and evaluated leave-one-subject-out on WESAD (Schmidt et al. 2018; 15 subjects, 1,032 sixty-second windows, 30% stress).
 
-The held-out unit is always a whole person. Random window splits leak subject identity through resting heart rate and skin-conductance level and inflate every metric; that split is not offered.
+The held-out unit is always a whole person. Random window splits leak subject identity through resting heart rate and skin conductance level and inflate every metric; that split is not offered.
 
 ## Models
 
