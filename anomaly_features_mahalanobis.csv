@@ -1,0 +1,16 @@
+sid,model,n,auroc
+S10,mahalanobis_features_baseline_only,71,0.9573283858998144
+S11,mahalanobis_features_baseline_only,70,0.9757045675413022
+S13,mahalanobis_features_baseline_only,70,0.9659863945578232
+S14,mahalanobis_features_baseline_only,70,0.956268221574344
+S15,mahalanobis_features_baseline_only,70,0.880466472303207
+S16,mahalanobis_features_baseline_only,68,0.9791666666666666
+S17,mahalanobis_features_baseline_only,72,0.870452528837622
+S2,mahalanobis_features_baseline_only,66,0.9328107502799552
+S3,mahalanobis_features_baseline_only,67,0.8648936170212767
+S4,mahalanobis_features_baseline_only,67,0.9978070175438597
+S5,mahalanobis_features_baseline_only,69,0.9367346938775512
+S6,mahalanobis_features_baseline_only,68,0.9437500000000001
+S7,mahalanobis_features_baseline_only,68,0.99140708915145
+S8,mahalanobis_features_baseline_only,68,0.9969604863221884
+S9,mahalanobis_features_baseline_only,68,0.9145833333333333
